@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "451524092715-ihp3dvcutvuugomsb8eutln6gkihh65o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "de.openfiresource.falarm",
+            "certificate_hash": "CAACBC3FA70ECE26E85FB6F4D2446D6F4B5BA63B"
+          }
+        },
+        {
           "client_id": "451524092715-5ekq9etemdel8kuuck7v4fb2hjnn9qbv.apps.googleusercontent.com",
           "client_type": 3
         }

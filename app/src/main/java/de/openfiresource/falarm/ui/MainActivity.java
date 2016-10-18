@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -16,8 +17,10 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
 
 import com.dexafree.materialList.card.Card;
@@ -25,6 +28,9 @@ import com.dexafree.materialList.card.CardProvider;
 import com.dexafree.materialList.card.action.WelcomeButtonAction;
 import com.dexafree.materialList.listeners.RecyclerItemClickListener;
 import com.dexafree.materialList.view.MaterialListView;
+import com.firebase.ui.auth.AuthUI;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.listener.multi.CompositeMultiplePermissionsListener;
 import com.karumi.dexter.listener.multi.SnackbarOnAnyDeniedMultiplePermissionsListener;
@@ -34,6 +40,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import de.openfiresource.falarm.BuildConfig;
 import de.openfiresource.falarm.R;
 import de.openfiresource.falarm.dialogs.MainMultiplePermissionsListener;
 import de.openfiresource.falarm.models.OperationMessage;
@@ -42,10 +49,11 @@ import de.openfiresource.falarm.utils.PlayServiceUtils;
 public class MainActivity extends AppCompatActivity implements RecyclerItemClickListener.OnItemClickListener {
 
     public static final String INTENT_RECEIVED_MESSAGE = "de.openfiresource.falarm.ui.receivedMessage";
-    public static final String SHOW_WELCOME_CARD = "showWelcomeCard";
     public static final String SHOW_WELCOME_CARD_VERSION = "showWelcomeCardVersion";
+    private static final int RC_SIGN_IN = 9001;
 
     private SharedPreferences mSharedPreferences;
+    private FirebaseAuth mAuth;
 
     @BindView(android.R.id.content)
     ViewGroup rootView;
@@ -75,6 +83,16 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemClick
         updateNotifications();
         mListView.addOnItemTouchListener(this);
 
+        //Auth
+        mAuth = FirebaseAuth.getInstance();
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user != null) {
+            Uri pic = user.getPhotoUrl();
+            Log.d("TAG", pic.toString());
+        } else {
+            startActivityForResult(showLogin(), RC_SIGN_IN);
+        }
+
         //Load permissions
         CompositeMultiplePermissionsListener compositeMultiplePermissionsListener
                 = new CompositeMultiplePermissionsListener(new MainMultiplePermissionsListener(this),
@@ -89,7 +107,19 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemClick
                 Manifest.permission.WRITE_EXTERNAL_STORAGE);
     }
 
-    public int getVersionCode() {
+    private Intent showLogin() {
+        return AuthUI.getInstance()
+                .createSignInIntentBuilder()
+                .setTheme(R.style.AppTheme)
+                .setLogo(R.drawable.falarm_logo)
+                .setIsSmartLockEnabled(!BuildConfig.DEBUG)
+                .setProviders(
+                        AuthUI.EMAIL_PROVIDER,
+                        AuthUI.GOOGLE_PROVIDER)
+                .build();
+    }
+
+    private int getVersionCode() {
         PackageManager pm = getBaseContext().getPackageManager();
         try {
             PackageInfo pi = pm.getPackageInfo(getBaseContext().getPackageName(), 0);
@@ -113,6 +143,26 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemClick
         registerReceiver(receiver, filterSend);
 
         super.onStart();
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RC_SIGN_IN) {
+            if (resultCode == RESULT_OK) {
+                final FirebaseUser user = mAuth.getCurrentUser();
+                user.getToken(true).addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        String idToken = task.getResult().getToken();
+                    }
+                });
+            }
+            // user is signed in!
+            startActivity(new Intent(this, MainActivity.class));
+            finish();
+        } else {
+            // user is not signed in. Maybe just wait for the user to press
+            // "sign in" again, or show a message
+        }
     }
 
     @Override
@@ -217,6 +267,16 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemClick
             case R.id.action_settings:
                 intent = new Intent(this, SettingsActivity.class);
                 startActivity(intent);
+                return true;
+            case R.id.action_signout:
+                AuthUI.getInstance()
+                        .signOut(this)
+                        .addOnCompleteListener(task -> {
+                            // user is now signed out
+                            startActivity(showLogin());
+                            finish();
+                        });
+                finish();
                 return true;
             case R.id.action_about:
                 new LibsBuilder()

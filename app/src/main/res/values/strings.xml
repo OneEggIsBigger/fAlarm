@@ -8,6 +8,12 @@
 
     <string name="send_to">Sende zu</string>
 
+    <!-- Signin -->
+    <string name="loading">Loading…</string>
+
+    <!-- Button labels -->
+    <string name="sign_out">Sign Out</string>
+
     <!-- Operation -->
     <string name="operation_tab_info">Info</string>
     <string name="operation_tab_map">Karte</string>
@@ -161,6 +167,7 @@
     <string name="create">Erstellen</string>
     <string name="delete">Löschen</string>
     <string name="operation_base">Einsatzort</string>
+    <string name="title_activity_signin">Sign In</string>
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_operation">Alarmnachricht</string>
 
