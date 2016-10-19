@@ -9,7 +9,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -17,7 +16,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.format.DateFormat;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -35,6 +33,16 @@ import com.karumi.dexter.Dexter;
 import com.karumi.dexter.listener.multi.CompositeMultiplePermissionsListener;
 import com.karumi.dexter.listener.multi.SnackbarOnAnyDeniedMultiplePermissionsListener;
 import com.mikepenz.aboutlibraries.LibsBuilder;
+import com.mikepenz.google_material_typeface_library.GoogleMaterial;
+import com.mikepenz.materialdrawer.AccountHeader;
+import com.mikepenz.materialdrawer.AccountHeaderBuilder;
+import com.mikepenz.materialdrawer.Drawer;
+import com.mikepenz.materialdrawer.DrawerBuilder;
+import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
+import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
+import com.mikepenz.materialdrawer.model.SectionDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.Nameable;
 
 import java.util.List;
 
@@ -46,14 +54,22 @@ import de.openfiresource.falarm.dialogs.MainMultiplePermissionsListener;
 import de.openfiresource.falarm.models.OperationMessage;
 import de.openfiresource.falarm.utils.PlayServiceUtils;
 
-public class MainActivity extends AppCompatActivity implements RecyclerItemClickListener.OnItemClickListener {
+public class MainActivity extends AppCompatActivity implements RecyclerItemClickListener.OnItemClickListener,
+        Drawer.OnDrawerItemClickListener {
 
     public static final String INTENT_RECEIVED_MESSAGE = "de.openfiresource.falarm.ui.receivedMessage";
     public static final String SHOW_WELCOME_CARD_VERSION = "showWelcomeCardVersion";
     private static final int RC_SIGN_IN = 9001;
 
+    private static final int NAV_RULES = 1;
+    private static final int NAV_SETTINGS = 2;
+    private static final int NAV_LOGOUT = 3;
+    private static final int NAV_ABOUT = 4;
+
     private SharedPreferences mSharedPreferences;
     private FirebaseAuth mAuth;
+    private FirebaseUser mUser;
+    private Drawer mDrawer;
 
     @BindView(android.R.id.content)
     ViewGroup rootView;
@@ -77,34 +93,33 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemClick
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        //Toolbar
-        setSupportActionBar(mToolbar);
-
-        updateNotifications();
-        mListView.addOnItemTouchListener(this);
-
         //Auth
         mAuth = FirebaseAuth.getInstance();
-        FirebaseUser user = mAuth.getCurrentUser();
-        if (user != null) {
-            Uri pic = user.getPhotoUrl();
-            Log.d("TAG", pic.toString());
-        } else {
-            startActivityForResult(showLogin(), RC_SIGN_IN);
-        }
+        mUser = mAuth.getCurrentUser();
 
-        //Load permissions
-        CompositeMultiplePermissionsListener compositeMultiplePermissionsListener
-                = new CompositeMultiplePermissionsListener(new MainMultiplePermissionsListener(this),
-                SnackbarOnAnyDeniedMultiplePermissionsListener.Builder.with(rootView,
-                        R.string.permission_rationale_message)
-                        .withOpenSettingsButton(R.string.permission_rationale_settings_button_text)
-                        .build());
-        Dexter.checkPermissions(compositeMultiplePermissionsListener,
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if (mUser == null) {
+            startActivityForResult(showLogin(), RC_SIGN_IN);
+        } else {
+            //Toolbar
+            setUpNavidationDrawer();
+
+            updateNotifications();
+            mListView.addOnItemTouchListener(this);
+            
+            //Load permissions
+            CompositeMultiplePermissionsListener compositeMultiplePermissionsListener
+                    = new CompositeMultiplePermissionsListener(new MainMultiplePermissionsListener(this),
+                    SnackbarOnAnyDeniedMultiplePermissionsListener.Builder.with(rootView,
+                            R.string.permission_rationale_message)
+                            .withOpenSettingsButton(R.string.permission_rationale_settings_button_text)
+                            .build());
+            Dexter.checkPermissions(compositeMultiplePermissionsListener,
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        }
     }
 
     private Intent showLogin() {
@@ -117,6 +132,83 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemClick
                         AuthUI.EMAIL_PROVIDER,
                         AuthUI.GOOGLE_PROVIDER)
                 .build();
+    }
+
+    private void setUpNavidationDrawer() {
+        setSupportActionBar(mToolbar);
+
+        ProfileDrawerItem profileDrawerItem = new ProfileDrawerItem().withName(mUser.getDisplayName())
+                .withEmail(mUser.getEmail());
+        if (mUser.getPhotoUrl() != null)
+            profileDrawerItem.withIcon(mUser.getPhotoUrl());
+
+
+        // Create the AccountHeader
+        AccountHeader headerResult = new AccountHeaderBuilder()
+                .withActivity(this)
+                .withHeaderBackground(R.drawable.flame)
+                .addProfiles(profileDrawerItem)
+                .withOnAccountHeaderListener((view, profile, currentProfile) -> false)
+                .build();
+
+        mDrawer = new DrawerBuilder()
+                .withActivity(this)
+                .withToolbar(mToolbar)
+                .withAccountHeader(headerResult)
+                .addDrawerItems(
+                        new PrimaryDrawerItem().withName(getString(R.string.action_rules))
+                                .withIdentifier(NAV_RULES).withIcon(GoogleMaterial.Icon.gmd_group),
+                        new PrimaryDrawerItem().withName(getString(R.string.action_settings))
+                                .withIdentifier(NAV_SETTINGS).withIcon(GoogleMaterial.Icon.gmd_settings),
+                        new SectionDrawerItem().withName(getString(R.string.action_sub_user)),
+                        new PrimaryDrawerItem().withName(getString(R.string.action_logout))
+                                .withIdentifier(NAV_LOGOUT).withIcon(GoogleMaterial.Icon.gmd_clear)
+                )
+                .addStickyDrawerItems(new PrimaryDrawerItem().withName(getString(R.string.action_about))
+                        .withIdentifier(NAV_ABOUT).withIcon(GoogleMaterial.Icon.gmd_info))
+                .withOnDrawerItemClickListener(this)
+                .build();
+        mDrawer.setSelection(-1);
+
+    }
+
+    @Override
+    public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+        if (drawerItem != null) {
+            if (drawerItem instanceof Nameable) {
+                Intent intent;
+                switch ((int) drawerItem.getIdentifier()) {
+                    case NAV_RULES:
+                        intent = new Intent(this, RuleListActivity.class);
+                        startActivity(intent);
+                        break;
+                    case NAV_SETTINGS:
+                        intent = new Intent(this, SettingsActivity.class);
+                        startActivity(intent);
+                        break;
+                    case NAV_LOGOUT:
+                        AuthUI.getInstance()
+                                .signOut(this)
+                                .addOnCompleteListener(task -> {
+                                    // user is now signed out. Restart this activity to get the login screen.
+                                    Intent newIntent = getIntent();
+                                    finish();
+                                    startActivity(newIntent);
+                                });
+                        finish();
+                        break;
+                    case NAV_ABOUT:
+                        new LibsBuilder()
+                                .withFields(R.string.class.getFields())
+                                .withActivityTitle(getString(R.string.action_about))
+                                .withActivityTheme(R.style.AboutLibrariesTheme_Light)
+                                .start(this);
+                        break;
+                }
+            }
+        }
+        return false;
+
     }
 
     private int getVersionCode() {
@@ -149,16 +241,9 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemClick
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RC_SIGN_IN) {
             if (resultCode == RESULT_OK) {
-                final FirebaseUser user = mAuth.getCurrentUser();
-                user.getToken(true).addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        String idToken = task.getResult().getToken();
-                    }
-                });
+                finish();
+                startActivity(new Intent(this, MainActivity.class));
             }
-            // user is signed in!
-            startActivity(new Intent(this, MainActivity.class));
-            finish();
         } else {
             // user is not signed in. Maybe just wait for the user to press
             // "sign in" again, or show a message
@@ -244,7 +329,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemClick
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        //getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
@@ -256,35 +341,8 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemClick
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        Intent intent;
-
-        //noinspection SimplifiableIfStatement
         switch (id) {
-            case R.id.action_rules:
-                intent = new Intent(this, RuleListActivity.class);
-                startActivity(intent);
-                return true;
-            case R.id.action_settings:
-                intent = new Intent(this, SettingsActivity.class);
-                startActivity(intent);
-                return true;
-            case R.id.action_signout:
-                AuthUI.getInstance()
-                        .signOut(this)
-                        .addOnCompleteListener(task -> {
-                            // user is now signed out
-                            startActivity(showLogin());
-                            finish();
-                        });
-                finish();
-                return true;
-            case R.id.action_about:
-                new LibsBuilder()
-                        .withFields(R.string.class.getFields())
-                        .withActivityTitle(getString(R.string.action_about))
-                        .withActivityTheme(R.style.AboutLibrariesTheme_Light)
-                        .start(this);
-                return true;
+
         }
 
         return super.onOptionsItemSelected(item);
