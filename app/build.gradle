@@ -48,20 +48,16 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    apt 'com.jakewharton:butterknife-compiler:8.2.1'
-    testCompile 'junit:junit:4.12'
-    testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
-    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.4-beta2'
-    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
     compile('com.mikepenz:aboutlibraries:5.8.1@aar') {
         transitive = true
     }
     compile('com.mikepenz:materialdrawer:5.6.0@aar') {
         transitive = true
     }
-    compile "com.mikepenz:iconics-core:2.8.1@aar"
-    compile 'com.mikepenz:google-material-typeface:2.2.0.3.original@aar'
     compile 'org.osmdroid:osmdroid-android:5.4.1:release@aar'
+
+    compile 'com.mikepenz:iconics-core:2.8.1@aar'
+    compile 'com.mikepenz:google-material-typeface:2.2.0.3.original@aar'
     compile 'com.android.support:multidex:1.0.1'
     compile 'com.google.firebase:firebase-core:9.6.1'
     compile 'com.google.firebase:firebase-messaging:9.6.1'
@@ -79,9 +75,12 @@ dependencies {
     compile 'com.orhanobut:logger:1.15'
     compile 'com.karumi:dexter:2.2.2'
     compile 'com.squareup.picasso:picasso:2.5.2'
-    compile 'com.squareup.retrofit2:retrofit:2.1.0'
-    compile 'com.squareup.retrofit2:converter-gson:2.1.0'
-
+    compile 'com.android.volley:volley:1.0.0'
+    testCompile 'junit:junit:4.12'
+    testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
+    apt 'com.jakewharton:butterknife-compiler:8.2.1'
+    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.4-beta2'
+    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
 }
 
 apply plugin: 'com.google.gms.google-services'

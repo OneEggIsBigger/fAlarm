@@ -14,6 +14,9 @@
     <string name="operation_tab_info">Info</string>
     <string name="operation_tab_map">Karte</string>
     <string name="operation_tab_osm">OFM</string>
+    <string name="operation_tab_user">Mitglieder</string>
+    <string name="operation_come">Komme</string>
+    <string name="operation_come_not">Komme nicht</string>
     <string name="operation_confirm">Alarm bestätigen</string>
 
     <!-- Strings related to Main -->
@@ -38,6 +41,8 @@
 
     <!-- Strings related to Settings -->
     <string name="fcm_key_copied">FMC-ID in Zwischenablage kopiert!</string>
+    <string name="fcm_key_error">Error mit dem FCM-Key. Bitte erneut in den Settings registrieren!</string>
+    <string name="fcm_key_ok">FCM-Key erfolgreich registriert!</string>
 
     <!-- Example General settings -->
     <string name="pref_header_general">Allgemeines</string>
@@ -89,6 +94,7 @@
     <string name="pref_title_password">Passwort</string>
     <string name="pref_desc_password">Passwort für die Verschlüsselung</string>
     <string name="pref_title_fcm">FCM-ID</string>
+    <string name="pref_desc_fcm">Reregister FCM-Email</string>
 
     <!-- Example settings for Notifications -->
     <string name="pref_header_notifications">Benachrichtigungen</string>

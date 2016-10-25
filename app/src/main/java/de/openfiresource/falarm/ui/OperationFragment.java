@@ -23,6 +23,7 @@ import de.openfiresource.falarm.models.Notification;
 import de.openfiresource.falarm.models.OperationMessage;
 import de.openfiresource.falarm.service.AlarmService;
 import de.openfiresource.falarm.service.SpeakService;
+import de.openfiresource.falarm.utils.ApiUtils;
 
 /**
  * Created by stieglit on 12.08.2016.
@@ -49,6 +50,12 @@ public class OperationFragment extends Fragment {
 
     @BindView(R.id.operation_received)
     Button buttonOperationReceived;
+
+    @BindView(R.id.operation_come_not)
+    Button buttonOperationComeNot;
+
+    @BindView(R.id.operation_come)
+    Button buttonOperationCome;
 
     public OperationFragment() {
         // Required empty public constructor
@@ -82,6 +89,26 @@ public class OperationFragment extends Fragment {
 
     }
 
+    @OnClick(R.id.operation_come)
+    public void operationCome(View view) {
+        buttonOperationComeNot.setVisibility(View.GONE);
+        buttonOperationCome.setVisibility(View.GONE);
+
+        ApiUtils.confirm(mOperationMessage.getKey(), true);
+
+        operationReceived(view);
+    }
+
+    @OnClick(R.id.operation_come_not)
+    public void operationComeNot(View view) {
+        buttonOperationComeNot.setVisibility(View.GONE);
+        buttonOperationCome.setVisibility(View.GONE);
+
+        ApiUtils.confirm(mOperationMessage.getKey(), false);
+
+        operationReceived(view);
+    }
+
     @OnClick(R.id.operation_received)
     public void operationReceived(View view) {
         Intent intent = new Intent(getActivity(), AlarmService.class);
@@ -112,8 +139,17 @@ public class OperationFragment extends Fragment {
 
         if (!mIsAlarm) {
             buttonOperationReceived.setVisibility(View.GONE);
+            buttonOperationComeNot.setVisibility(View.GONE);
+            buttonOperationCome.setVisibility(View.GONE);
         } else {
             textViewTimer.setTextColor(Color.RED);
+
+            if(mOperationMessage.isWithCome()) {
+                buttonOperationReceived.setVisibility(View.GONE);
+            } else {
+                buttonOperationComeNot.setVisibility(View.GONE);
+                buttonOperationCome.setVisibility(View.GONE);
+            }
         }
 
         int period = 1000; // repeat every sec.
@@ -142,7 +178,11 @@ public class OperationFragment extends Fragment {
                 final String finalText = text + String.format("%d Sekunde%s", diff[3], diff[3] > 1 ? "n" : "");
 
                 getActivity().runOnUiThread(() -> {
-                    textViewTimer.setText(finalText);
+                    if(textViewTimer != null) {
+                        textViewTimer.setText(finalText);
+                    } else if(mTimer != null) {
+                        mTimer.cancel();
+                    }
                 });
             }
         }, 0, period);
@@ -152,7 +192,9 @@ public class OperationFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
-        mTimer.cancel();
+        if(mTimer != null) {
+            mTimer.cancel();
+        }
 
         if (mUnbinder != null)
             mUnbinder.unbind();

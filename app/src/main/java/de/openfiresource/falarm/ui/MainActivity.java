@@ -53,6 +53,7 @@ import de.openfiresource.falarm.R;
 import de.openfiresource.falarm.dialogs.MainMultiplePermissionsListener;
 import de.openfiresource.falarm.models.OperationMessage;
 import de.openfiresource.falarm.utils.PlayServiceUtils;
+import de.openfiresource.falarm.utils.ApiUtils;
 
 public class MainActivity extends AppCompatActivity implements RecyclerItemClickListener.OnItemClickListener,
         Drawer.OnDrawerItemClickListener {
@@ -243,6 +244,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemClick
             if (resultCode == RESULT_OK) {
                 finish();
                 startActivity(new Intent(this, MainActivity.class));
+                ApiUtils.register();
             }
         } else {
             // user is not signed in. Maybe just wait for the user to press

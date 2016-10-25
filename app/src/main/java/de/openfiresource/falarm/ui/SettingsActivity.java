@@ -21,12 +21,12 @@ import android.preference.RingtonePreference;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.support.v4.app.NavUtils;
-import android.widget.Toast;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 
 import de.openfiresource.falarm.R;
 import de.openfiresource.falarm.models.Notification;
+import de.openfiresource.falarm.utils.ApiUtils;
 
 import java.util.List;
 
@@ -289,16 +289,16 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             Preference fcmPreference = new Preference(getActivity());
             fcmPreference.setTitle(getString(R.string.pref_title_fcm));
             final String token = FirebaseInstanceId.getInstance().getToken();
-            fcmPreference.setSummary(token);
+            fcmPreference.setSummary(getText(R.string.pref_desc_fcm));
             fcmPreference.setOnPreferenceClickListener(preference -> {
-
+                ApiUtils.register(token);
+                /**
                 Intent sendIntent = new Intent();
                 sendIntent.setAction(Intent.ACTION_SEND);
                 sendIntent.putExtra(Intent.EXTRA_TEXT, token);
                 sendIntent.setType("text/plain");
                 startActivity(Intent.createChooser(sendIntent, getResources().getText(R.string.send_to)));
 
-                /**
                 android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
                 android.content.ClipData clip = android.content.ClipData.newPlainText("FCM-ID", token);
                 clipboard.setPrimaryClip(clip);

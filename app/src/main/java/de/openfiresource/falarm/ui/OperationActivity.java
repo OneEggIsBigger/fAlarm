@@ -98,7 +98,7 @@ public class OperationActivity extends AppCompatActivity {
 
             // Create the adapter that will return a fragment for each of the three
             // primary sections of the activity.
-            mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), mHaveMap);
+            mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), mHaveMap, mOperationMessage);
 
             // Set up the ViewPager with the sections adapter.
             mViewPager.setAdapter(mSectionsPagerAdapter);
@@ -184,25 +184,32 @@ public class OperationActivity extends AppCompatActivity {
      */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
+        private OperationMessage mOperationMessage;
         private boolean mWithMap;
         private List<String> mItemNames = new ArrayList<>();
         private List<Fragment> mItemValues = new ArrayList<>();
 
-        public SectionsPagerAdapter(FragmentManager fm, boolean withMap) {
+        public SectionsPagerAdapter(FragmentManager fm, boolean withMap, OperationMessage operationMessage) {
             super(fm);
             mWithMap = withMap;
+            mOperationMessage = operationMessage;
 
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(OperationActivity.this);
             String alarmMaps = preferences.getString("general_alarm_maps", "both");
 
-            String[] latlng = mOperationMessage.getLatlng().split(";");
-            double lat = Double.parseDouble(latlng[0]);
-            double lng = Double.parseDouble(latlng[1]);
-
             mItemNames.add(getString(R.string.operation_tab_info));
             mItemValues.add(OperationFragment.newInstance(mOperationMessage.getId(), OperationActivity.this.mIsAlarm));
 
+            if(mOperationMessage.isWithCome()) {
+                mItemNames.add(getString(R.string.operation_tab_user));
+                mItemValues.add(OperationUserFragment.newInstance(mOperationMessage.getId()));
+            }
+
             if (mWithMap) {
+                String[] latlng = mOperationMessage.getLatlng().split(";");
+                double lat = Double.parseDouble(latlng[0]);
+                double lng = Double.parseDouble(latlng[1]);
+
                 if (alarmMaps.equals("both") || alarmMaps.equals("gmap")) {
                     mItemNames.add(getString(R.string.operation_tab_map));
                     mItemValues.add(MapFragment.newInstance(lat, lng));

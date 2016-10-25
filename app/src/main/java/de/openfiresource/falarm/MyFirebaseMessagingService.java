@@ -1,24 +1,22 @@
 package de.openfiresource.falarm;
 
 
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.preference.PreferenceManager;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import java.util.Map;
+
 import de.openfiresource.falarm.models.OperationMessage;
+import de.openfiresource.falarm.models.OperationUser;
 import de.openfiresource.falarm.service.AlarmService;
 import de.openfiresource.falarm.ui.MainActivity;
 import de.openfiresource.falarm.ui.OperationActivity;
+import de.openfiresource.falarm.ui.OperationUserFragment;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
@@ -48,26 +46,41 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         Boolean activate = preferences.getBoolean("activate", true);
 
+        Map<String, String> data = remoteMessage.getData();
+
         // Check if message contains a data payload.
-        if (remoteMessage.getData().size() > 0 && activate) {
-            Log.d(TAG, "Message data payload: " + remoteMessage.getData());
-            OperationMessage operationMessage = OperationMessage.fromFCM(this, remoteMessage.getData());
-            if (operationMessage != null) {
-                long notificationId = operationMessage.save();
+        if (data.size() > 0) {
+            Log.d(TAG, "Message data payload: " + data);
+
+            //@todo: A little dirty now
+            if (data.containsKey("come")) {
+                OperationUser operationUser = OperationUser.fromFCM(this, data);
+                long opId = operationUser.save();
 
                 //Send Broadcast
                 Intent brIntent = new Intent();
-                brIntent.setAction(MainActivity.INTENT_RECEIVED_MESSAGE);
+                brIntent.setAction(OperationUserFragment.INTENT_USER_CHANGED);
                 sendBroadcast(brIntent);
 
-                //Start alarm Service
-                Intent intentData = new Intent(getBaseContext(),
-                        AlarmService.class);
-                intentData.putExtra(OperationActivity.EXTRA_ID, operationMessage.getId());
+            } else if (activate) {
+                OperationMessage operationMessage = OperationMessage.fromFCM(this, data);
+                if (operationMessage != null) {
+                    long notificationId = operationMessage.save();
 
-                //Firt stop old service when exist, then start new
-                stopService(intentData);
-                startService(intentData);
+                    //Send Broadcast
+                    Intent brIntent = new Intent();
+                    brIntent.setAction(MainActivity.INTENT_RECEIVED_MESSAGE);
+                    sendBroadcast(brIntent);
+
+                    //Start alarm Service
+                    Intent intentData = new Intent(getBaseContext(),
+                            AlarmService.class);
+                    intentData.putExtra(OperationActivity.EXTRA_ID, operationMessage.getId());
+
+                    //Firt stop old service when exist, then start new
+                    stopService(intentData);
+                    startService(intentData);
+                }
             }
         }
     }

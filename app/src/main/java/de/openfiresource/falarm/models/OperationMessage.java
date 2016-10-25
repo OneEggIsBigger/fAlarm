@@ -19,6 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -40,6 +41,8 @@ public class OperationMessage extends SugarRecord {
     String message;
     String latlng;
     Boolean seen;
+
+    Boolean withCome;
     JSONObject content;
 
     public OperationMessage() {
@@ -61,7 +64,7 @@ public class OperationMessage extends SugarRecord {
     public void setTitle(String title) {
         this.title = title;
     }
-    
+
     public String getKey() {
         return key;
     }
@@ -118,6 +121,20 @@ public class OperationMessage extends SugarRecord {
         this.latlng = latlng;
     }
 
+    public Boolean isWithCome() {
+        return withCome;
+    }
+
+    public void setWithCome(Boolean withCome) {
+        this.withCome = withCome;
+    }
+
+    public List<OperationUser> getOperationUser() {
+        return OperationUser.findWithQuery(OperationUser.class,
+                "Select * from Operation_User where operation_message = ? ORDER BY come", String.valueOf(getId()));
+        //return OperationUser.find(OperationUser.class, "operation_message = ?", String.valueOf(getId()));
+    }
+
     public static OperationMessage fromFCM(Context context, Map<String, String> extras) {
 
         OperationMessage incoming = new OperationMessage();
@@ -147,6 +164,13 @@ public class OperationMessage extends SugarRecord {
                     case "awf_latlng":
                         if (encryption) value = decrypt(value, encryptionKey);
                         incoming.setLatlng(value);
+                        break;
+                    case "awf_withcome":
+                        if (encryption) value = decrypt(value, encryptionKey);
+                        if(value.equals("true"))
+                            incoming.setWithCome(true);
+                        else
+                            incoming.setWithCome(false);
                         break;
                     case "awf_timestamp":
                         if (encryption) value = decrypt(value, encryptionKey);

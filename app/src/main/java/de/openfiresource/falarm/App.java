@@ -16,6 +16,7 @@ import com.squareup.leakcanary.LeakCanary;
 import com.squareup.picasso.Picasso;
 
 import de.openfiresource.falarm.models.Notification;
+import de.openfiresource.falarm.utils.ApiUtils;
 
 /**
  * Created by stieglit on 03.08.2016.
@@ -27,6 +28,7 @@ public class App extends SugarApp {
         SugarContext.init(this);
         LeakCanary.install(this);
         Dexter.initialize(this);
+        ApiUtils.init(this);
 
         //Load Default settings
         PreferenceManager.setDefaultValues(this, R.xml.pref_data_sync, false);
