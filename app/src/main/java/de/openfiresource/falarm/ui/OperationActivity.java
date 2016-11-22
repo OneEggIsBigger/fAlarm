@@ -200,11 +200,6 @@ public class OperationActivity extends AppCompatActivity {
             mItemNames.add(getString(R.string.operation_tab_info));
             mItemValues.add(OperationFragment.newInstance(mOperationMessage.getId(), OperationActivity.this.mIsAlarm));
 
-            if(mOperationMessage.isWithCome()) {
-                mItemNames.add(getString(R.string.operation_tab_user));
-                mItemValues.add(OperationUserFragment.newInstance(mOperationMessage.getId()));
-            }
-
             if (mWithMap) {
                 String[] latlng = mOperationMessage.getLatlng().split(";");
                 double lat = Double.parseDouble(latlng[0]);
@@ -219,6 +214,11 @@ public class OperationActivity extends AppCompatActivity {
                     mItemNames.add(getString(R.string.operation_tab_osm));
                     mItemValues.add(OsmMapFragment.newInstance(lat, lng));
                 }
+            }
+
+            if(mOperationMessage.isWithCome()) {
+                mItemNames.add(getString(R.string.operation_tab_user));
+                mItemValues.add(OperationUserFragment.newInstance(mOperationMessage.getId()));
             }
         }
 

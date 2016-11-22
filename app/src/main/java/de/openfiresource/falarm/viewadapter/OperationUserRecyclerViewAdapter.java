@@ -9,6 +9,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.orm.SugarRecord;
@@ -57,9 +58,9 @@ public class OperationUserRecyclerViewAdapter
         holder.mContentView.setText(operationUser.getName());
 
         if(operationUser.isCome())
-            holder.mCountView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.md_green_400));
+            holder.mCountLayoutView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.md_green_400));
         else
-            holder.mCountView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.md_red_400));
+            holder.mCountLayoutView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.md_red_400));
 
         /*
         holder.mView.setOnClickListener((v) -> {
@@ -75,11 +76,15 @@ public class OperationUserRecyclerViewAdapter
     public class ViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
 
+        @BindView(R.id.id_layout)
+        public LinearLayout mCountLayoutView;
+
         @BindView(R.id.id)
         public TextView mCountView;
 
         @BindView(R.id.content)
         public TextView mContentView;
+
 
         public OperationUser mItem;
 

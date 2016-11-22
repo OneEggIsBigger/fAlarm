@@ -109,12 +109,21 @@
         <service
             android:name=".service.AlarmService"
             android:enabled="true"
-            android:exported="false"></service>
-
+            android:exported="false" />
         <service
             android:name=".service.SpeakService"
             android:enabled="true"
-            android:exported="false"></service>
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.LegalNoticeActivity"
+            android:label="@string/title_activity_legal_notice"
+            android:parentActivityName=".ui.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="de.openfiresource.falarm.ui.MainActivity" />
+        </activity>
     </application>
 
 </manifest>

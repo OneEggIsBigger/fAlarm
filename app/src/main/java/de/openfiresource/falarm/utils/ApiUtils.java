@@ -22,7 +22,7 @@ import de.openfiresource.falarm.R;
  */
 
 public class ApiUtils {
-    private static final String URL = "http://172.16.128.159:3000/";
+    private static final String URL = "https://falcon.alphard.uberspace.de/falarm/";
 
     private static RequestQueue queue;
     private static Context context;

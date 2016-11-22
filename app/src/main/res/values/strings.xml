@@ -7,6 +7,7 @@
     <string name="action_logout">Logout</string>
     <string name="action_stopSpeak">Vorlesen anhalten</string>
     <string name="action_sub_user">User</string>
+    <string name="action_legal_notice">Legal Notice</string>
 
     <string name="send_to">Sende zu</string>
 
@@ -177,4 +178,5 @@
     <string name="permission_rationale_title">Berechtigungen</string>
     <string name="permission_rationale_message">Diese Berechtigungen sind für den vollen Funktionsumfang von fAlarm notwendig.</string>
     <string name="permission_rationale_settings_button_text">SETTINGS</string>
+    <string name="title_activity_legal_notice">Legal Notice</string>
 </resources>

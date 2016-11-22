@@ -131,7 +131,7 @@ public class OperationMessage extends SugarRecord {
 
     public List<OperationUser> getOperationUser() {
         return OperationUser.findWithQuery(OperationUser.class,
-                "Select * from Operation_User where operation_message = ? ORDER BY come", String.valueOf(getId()));
+                "Select * from Operation_User where operation_message = ? ORDER BY come DESC", String.valueOf(getId()));
         //return OperationUser.find(OperationUser.class, "operation_message = ?", String.valueOf(getId()));
     }
 

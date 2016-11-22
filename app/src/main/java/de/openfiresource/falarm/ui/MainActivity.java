@@ -66,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemClick
     private static final int NAV_SETTINGS = 2;
     private static final int NAV_LOGOUT = 3;
     private static final int NAV_ABOUT = 4;
+    private static final int NAV_LEGAL_NOTICE = 5;
 
     private SharedPreferences mSharedPreferences;
     private FirebaseAuth mAuth;
@@ -167,6 +168,8 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemClick
                 )
                 .addStickyDrawerItems(new PrimaryDrawerItem().withName(getString(R.string.action_about))
                         .withIdentifier(NAV_ABOUT).withIcon(GoogleMaterial.Icon.gmd_info))
+                .addStickyDrawerItems(new PrimaryDrawerItem().withName(getString(R.string.action_legal_notice))
+                        .withIdentifier(NAV_LEGAL_NOTICE).withIcon(GoogleMaterial.Icon.gmd_mood))
                 .withOnDrawerItemClickListener(this)
                 .build();
         mDrawer.setSelection(-1);
@@ -185,6 +188,10 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemClick
                         break;
                     case NAV_SETTINGS:
                         intent = new Intent(this, SettingsActivity.class);
+                        startActivity(intent);
+                        break;
+                    case NAV_LEGAL_NOTICE:
+                        intent = new Intent(this, LegalNoticeActivity.class);
                         startActivity(intent);
                         break;
                     case NAV_LOGOUT:
